@@ -1,23 +1,12 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import useSWR from 'swr'
 import { Ticket } from '@/types'
 import { useMessagesContext } from '@/context/MessagesContext'
 
-const fetcher = (url: string) => fetch(url).then(r => r.json())
-
 const MessagesPage: NextPage = () => {
   const router = useRouter()
-  const { activeTicketId, setActiveTicketId, setUnreadCount } = useMessagesContext()
-  const { data: tickets } = useSWR<Ticket[]>('/api/tickets', fetcher)
-
-  // Sync unread count into context
-  useEffect(() => {
-    if (tickets) {
-      setUnreadCount(tickets.filter(t => t.unread).length)
-    }
-  }, [tickets, setUnreadCount])
+  const { activeTicketId, setActiveTicketId, tickets } = useMessagesContext()
 
   // Context is the single source of truth for the active ticket.
   const currentTicketId = activeTicketId

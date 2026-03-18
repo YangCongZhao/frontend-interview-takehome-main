@@ -88,12 +88,13 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
             )
             return (
               <RoomRow
-                  key={room.id}
-                  rowId={room.id}
-                  rowName={room.name}
-                  bookings={roomBookings}
-                  totalDays={TOTAL_DAYS}
-                  onBookingClick={onBookingClick} visibleStartIndex={0} visibleEndIndex={0}              />
+                key={room.id}
+                rowId={room.id}
+                rowName={room.name}
+                bookings={roomBookings}
+                totalDays={TOTAL_DAYS}
+                onBookingClick={onBookingClick}
+              />
             )
           })}
         </div>

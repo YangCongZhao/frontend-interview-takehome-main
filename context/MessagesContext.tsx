@@ -1,11 +1,13 @@
 import React, {
   createContext,
   useContext,
+  useMemo,
   useState,
   useEffect,
   ReactNode,
 } from 'react'
 import { useRouter } from 'next/router'
+import useSWR from 'swr'
 import { Ticket } from '@/types'
 
 interface House {
@@ -24,17 +26,22 @@ interface MessagesContextValue {
   setCurrentHouse: (house: House | null) => void
   activeTicketId: string | null
   setActiveTicketId: (id: string | null) => void
+  tickets: Ticket[] | undefined
   unreadCount: number
-  setUnreadCount: (n: number) => void
 }
 
 const MessagesContext = createContext<MessagesContextValue | null>(null)
+const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 export function MessagesProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [currentHouse, setCurrentHouse] = useState<House | null>(null)
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null)
-  const [unreadCount, setUnreadCount] = useState(0)
+  const { data: tickets } = useSWR<Ticket[]>('/api/tickets', fetcher)
+  const unreadCount = useMemo(
+    () => tickets?.filter(ticket => ticket.unread).length ?? 0,
+    [tickets]
+  )
 
   useEffect(() => {
     const houseId = router.query.houseId as string
@@ -52,8 +59,8 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
         setCurrentHouse,
         activeTicketId,
         setActiveTicketId,
+        tickets,
         unreadCount,
-        setUnreadCount,
       }}
     >
       {children}
