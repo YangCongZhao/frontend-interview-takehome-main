@@ -17,6 +17,7 @@
    - Context
    - router.query
 5. components/BookingGrid/RoomRow.tsx  `hoveredCell` 放到了全局的AppContext 导致鼠标每移动一个格子 30个room全部重新渲染。 
+6. Booking Calendar header时间和 body room 滑动时不一致  导致时间和 Booking Detail 不一致
 
 
 ## 应用的修复
@@ -26,6 +27,7 @@
 4.   多个数据源会在Messages list 数据多的时候导致不同步 id不一样。 修改为单一获取 统一使用在MessagesProvider hook中使用 router.query获取 全局共享唯一ticketId。 [ 关联问题 2 ]
 5.  删掉 components/BookingGrid/RoomRow.tsx 全局变量`hoveredCell` 改为 `RoomRow`hook 组件自己维护每个小方格的index 把`onMouseLeave` 改到外层dom上 不需要在每个小方格上触发 减少事件频率。
    - ![img.png](img.png) 鼠标滑进小方格后 只打印当前room 不会打印 1-30 room 
+6.  将Booking Calendar header改为和body一起滑动 滑动的时候实时计算日期
 ## 权衡取舍
 1. 问题4中 保留 `MessagesContext`，移除 `SSR getServerSideProps` 和页面直接读取 `router.query` 这两种状态来源，是为了在不重构消息模块的前提下把“当前工单”收敛为单一数据源，避免数据多的时候导致不同步 造成状态漂移。
 2. 问题5中 将频繁触发的`onMouseEnter`事件绑定了全局context值，导致鼠标滑动整个页面全部重新re-render。hover 是一个非常高频并且比较局部的 UI 状态，不适合放进全局 Context。Context一般存放query、用户信息、主题色等等。所以删除了Context变量，该用了局部的useState

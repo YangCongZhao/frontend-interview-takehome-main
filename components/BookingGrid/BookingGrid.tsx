@@ -22,7 +22,7 @@ function getDayLabels(startDate: string, totalDays: number): string[] {
 }
 
 export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGridProps) {
-  const { containerRef, visibleRange, handleScroll } = useVisibleRange({
+  const { containerRef, handleScroll, scrollLeft } = useVisibleRange({
     totalColumns: TOTAL_DAYS,
     columnWidthPx: COLUMN_WIDTH_PX,
     leadingOffsetPx: 140,
@@ -31,6 +31,7 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
 
   const startDate = new Date().toISOString().split('T')[0]
   const dayLabels = getDayLabels(startDate, TOTAL_DAYS)
+  const totalGridWidth = TOTAL_DAYS * COLUMN_WIDTH_PX
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -43,14 +44,18 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
           style={{
             flex: 1,
             overflow: 'hidden',
-            display: 'flex',
             background: config.bookingHeaderBackground
           }}
         >
-          {Array.from({ length: visibleRange.endIndex - visibleRange.startIndex + 1 }, (_, i) => {
-            const dayIndex = visibleRange.startIndex + i
-            if (dayIndex >= TOTAL_DAYS) return null
-            return (
+          <div
+            style={{
+              display: 'flex',
+              width: totalGridWidth,
+              transform: `translateX(-${scrollLeft}px)`,
+              willChange: 'transform',
+            }}
+          >
+            {dayLabels.map((label, dayIndex) => (
               <div
                 key={dayIndex}
                 style={{
@@ -63,10 +68,10 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
                   color: '#666',
                 }}
               >
-                {dayLabels[dayIndex]}
+                {label}
               </div>
-            )
-          })}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -83,15 +88,12 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
             )
             return (
               <RoomRow
-                key={room.id}
-                rowId={room.id}
-                rowName={room.name}
-                bookings={roomBookings}
-                visibleStartIndex={visibleRange.startIndex}
-                visibleEndIndex={visibleRange.endIndex}
-                totalDays={TOTAL_DAYS}
-                onBookingClick={onBookingClick}
-              />
+                  key={room.id}
+                  rowId={room.id}
+                  rowName={room.name}
+                  bookings={roomBookings}
+                  totalDays={TOTAL_DAYS}
+                  onBookingClick={onBookingClick} visibleStartIndex={0} visibleEndIndex={0}              />
             )
           })}
         </div>

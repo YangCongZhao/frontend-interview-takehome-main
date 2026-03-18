@@ -8,8 +8,6 @@ interface RoomRowProps {
   rowId: string;
   rowName: string;
   bookings: Booking[];
-  visibleStartIndex: number;
-  visibleEndIndex: number;
   totalDays: number;
   onBookingClick: (booking: Booking) => void;
 }
@@ -26,8 +24,6 @@ export function RoomRow({
   rowId,
   rowName,
   bookings,
-  visibleStartIndex,
-  visibleEndIndex,
   totalDays,
   onBookingClick,
 }: RoomRowProps) {
@@ -42,19 +38,6 @@ export function RoomRow({
 
   const visibleBookings = useMemo(() => {
     return bookings
-      .filter((b) => {
-        const startDay = Math.floor(
-          (new Date(b.checkIn).getTime() -
-            new Date(config.dateRangeStart).getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-        const endDay = Math.floor(
-          (new Date(b.checkOut).getTime() -
-            new Date(config.dateRangeStart).getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-        return endDay >= visibleStartIndex && startDay <= visibleEndIndex;
-      })
       .map((b) => {
         const startDay = Math.floor(
           (new Date(b.checkIn).getTime() -
@@ -68,8 +51,9 @@ export function RoomRow({
         );
         const color = getBookingStatus(b.status);
         return { booking: b, startDay, endDay, color };
-      });
-  }, [bookings, visibleStartIndex, visibleEndIndex, config.dateRangeStart]);
+      })
+      .filter(({ startDay, endDay }) => endDay >= 0 && startDay < totalDays);
+  }, [bookings, config.dateRangeStart, totalDays]);
 
 
 
@@ -88,56 +72,54 @@ export function RoomRow({
         style={{
           width: 140,
           minWidth: 140,
+          position: "sticky",
+          left: 0,
           padding: "8px 12px",
           fontWeight: 500,
           fontSize: 13,
           borderRight: "1px solid #eee",
-          background: "white",
-          zIndex: 1,
+          background: isHovered ? "#f0f7ff" : "white",
+          zIndex: 3,
         }}
       >
         {rowName}
       </div>
 
       <div
-        style={{ position: "relative", height: 40, flex: 1 }}
+        style={{
+          position: "relative",
+          height: 40,
+          width: totalDays * COLUMN_WIDTH_PX,
+          minWidth: totalDays * COLUMN_WIDTH_PX,
+        }}
         onMouseLeave={() => setHoveredDayIndex(null)}
       >
         {/* Day cell backgrounds */}
-        {Array.from(
-          { length: visibleEndIndex - visibleStartIndex + 1 },
-          (_, i) => {
-            const dayIndex = visibleStartIndex + i;
-            const isCellHovered = hoveredDayIndex === dayIndex;
-            return (
-              <div
-                key={dayIndex}
-                style={{
-                  position: "absolute",
-                  left: (dayIndex - visibleStartIndex) * COLUMN_WIDTH_PX,
-                  width: COLUMN_WIDTH_PX,
-                  height: 40,
-                  background: isCellHovered ? "#e3f2fd" : "transparent",
-                  borderRight: "1px solid #f0f0f0",
-                  cursor: "default",
-                }}
-                onMouseEnter={() => setHoveredDayIndex(dayIndex)}
-              />
-            );
-          },
-        )}
+        {Array.from({ length: totalDays }, (_, dayIndex) => {
+          const isCellHovered = hoveredDayIndex === dayIndex;
+          return (
+            <div
+              key={dayIndex}
+              style={{
+                position: "absolute",
+                left: dayIndex * COLUMN_WIDTH_PX,
+                width: COLUMN_WIDTH_PX,
+                height: 40,
+                background: isCellHovered ? "#e3f2fd" : "transparent",
+                borderRight: "1px solid #f0f0f0",
+                cursor: "default",
+              }}
+              onMouseEnter={() => setHoveredDayIndex(dayIndex)}
+            />
+          );
+        })}
 
         {/* Booking bars */}
         {visibleBookings.map(({ booking, startDay, endDay, color }) => {
-          const left = Math.max(
-            0,
-            (startDay - visibleStartIndex) * COLUMN_WIDTH_PX,
-          );
-          const width =
-            (Math.min(endDay, visibleEndIndex) -
-              Math.max(startDay, visibleStartIndex) +
-              1) *
-            COLUMN_WIDTH_PX;
+          const clippedStartDay = Math.max(0, startDay);
+          const clippedEndDay = Math.min(totalDays - 1, endDay);
+          const left = clippedStartDay * COLUMN_WIDTH_PX;
+          const width = (clippedEndDay - clippedStartDay + 1) * COLUMN_WIDTH_PX;
           return (
             <div
               key={booking.id}

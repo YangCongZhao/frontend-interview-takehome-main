@@ -44,6 +44,8 @@ export function useVisibleRange({
     return () => observer.disconnect()
   }, [])
 
+
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollLeft(e.currentTarget.scrollLeft)
   }, [])
