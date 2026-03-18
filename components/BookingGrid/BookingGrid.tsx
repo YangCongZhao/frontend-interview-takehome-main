@@ -22,7 +22,11 @@ function getDayLabels(startDate: string, totalDays: number): string[] {
 }
 
 export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGridProps) {
-  const { visibleRange, handleScroll } = useVisibleRange()
+  const { containerRef, visibleRange, handleScroll } = useVisibleRange({
+    totalColumns: TOTAL_DAYS,
+    columnWidthPx: COLUMN_WIDTH_PX,
+    leadingOffsetPx: 140,
+  })
   const { config } = useAppContext()
 
   const startDate = new Date().toISOString().split('T')[0]
@@ -68,6 +72,7 @@ export function BookingGrid({ roomUnits, bookings, onBookingClick }: BookingGrid
 
       {/* Scrollable grid body */}
       <div
+        ref={containerRef}
         style={{ flex: 1, overflowX: 'auto', overflowY: 'auto' }}
         onScroll={handleScroll}
       >
