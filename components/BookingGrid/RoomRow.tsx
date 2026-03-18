@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Booking, BookingStatus } from "@/types";
 import { useAppContext } from "@/context/AppContext";
 
@@ -33,7 +33,8 @@ export function RoomRow({
 }: RoomRowProps) {
   console.log("render", rowId);
 
-  const { hoveredCell, setHoveredCell, config } = useAppContext();
+  const { config } = useAppContext();
+  const [hoveredDayIndex, setHoveredDayIndex] = useState<number | null>(null);
 
     const getBookingStatus = (status: BookingStatus): string => {
         return STATUS_COLORS[status] ?? "#ccc";
@@ -72,7 +73,7 @@ export function RoomRow({
 
 
 
-  const isHovered = hoveredCell?.rowId === rowId;
+  const isHovered = hoveredDayIndex !== null;
 
   return (
     <div
@@ -98,15 +99,16 @@ export function RoomRow({
         {rowName}
       </div>
 
-      <div style={{ position: "relative", height: 40, flex: 1 }}>
+      <div
+        style={{ position: "relative", height: 40, flex: 1 }}
+        onMouseLeave={() => setHoveredDayIndex(null)}
+      >
         {/* Day cell backgrounds */}
         {Array.from(
           { length: visibleEndIndex - visibleStartIndex + 1 },
           (_, i) => {
             const dayIndex = visibleStartIndex + i;
-            const isCellHovered =
-              hoveredCell?.rowId === rowId &&
-              hoveredCell?.dayIndex === dayIndex;
+            const isCellHovered = hoveredDayIndex === dayIndex;
             return (
               <div
                 key={dayIndex}
@@ -119,8 +121,7 @@ export function RoomRow({
                   borderRight: "1px solid #f0f0f0",
                   cursor: "default",
                 }}
-                onMouseEnter={() => setHoveredCell({ rowId, dayIndex })}
-                onMouseLeave={() => setHoveredCell(null)}
+                onMouseEnter={() => setHoveredDayIndex(dayIndex)}
               />
             );
           },

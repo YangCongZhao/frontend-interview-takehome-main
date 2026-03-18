@@ -19,10 +19,11 @@ const MessagesPage: NextPage = () => {
     }
   }, [tickets, setUnreadCount])
 
-  // Use ticketId from URL or context
-  const currentTicketId = (router.query.ticketId as string) ?? activeTicketId
+  // Context is the single source of truth for the active ticket.
+  const currentTicketId = activeTicketId
 
   const handleTicketClick = (ticket: Ticket) => {
+    setActiveTicketId(ticket.id)
     router.push(
       {
         pathname: '/messages',

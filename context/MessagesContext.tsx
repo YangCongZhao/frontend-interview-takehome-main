@@ -39,18 +39,11 @@ export function MessagesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const houseId = router.query.houseId as string
     const ticketId = router.query.ticketId as string
+    const house = HOUSES.find(h => h.id === houseId) ?? null
 
-    if (ticketId) {
-      setActiveTicketId(ticketId)
-    }
-
-    if (houseId) {
-      const house = HOUSES.find(h => h.id === houseId)
-      if (house) {
-        setCurrentHouse(house)
-      }
-    }
-  }, [router.query])
+    setActiveTicketId(ticketId ?? null)
+    setCurrentHouse(house)
+  }, [router.query.houseId, router.query.ticketId])
 
   return (
     <MessagesContext.Provider
