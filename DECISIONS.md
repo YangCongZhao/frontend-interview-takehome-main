@@ -17,8 +17,8 @@
    - Context
    - router.query
 5. components/BookingGrid/RoomRow.tsx  `hoveredCell` 放到了全局的AppContext 导致鼠标每移动一个格子 30个room全部重新渲染。 
-6. Booking Calendar header时间和 body room 滑动时不一致  导致时间和 Booking Detail 不一致
-7. Messages 右边的角标 在刚进入页面的时候 不显示 只有在点击进入的时候 才掉api。
+6. Booking Calendar header时间和 body room 滑动时不一致  导致时间和 Booking 不一致 比如 第一个Alice Chen 正常是 3/18 - 3/21。但是我一像右滑动 Alice Chen  截止到了3/19 时间对不齐
+7. Messages 右边的角标 在刚进入页面的时候 不显示 只有在点击进入的时候 才调用api。
 8. 隐藏时间bug  components/BookingGrid/BookingGrid.tsx  `getDayLabels` 处理时间问题
 
 
@@ -39,3 +39,10 @@
 ## 如果有更多时间
 1. 将Booking Calendar 增加鼠标点击滑动创建的功能
 2. 页面中的三元运算符 失败的处理都是 null  可以给一些空提示和一些样式
+3. 现在的context provider 比较混乱 直接注入了 _app.tsx 建议更换为 app router的文件方式 单独在每个路由的layout里面注入对应的provider
+4. 将Booking 日历组件的 数据统一抽离到同一个hook里面做到单一数据来源  下面这些强关联的变量 常量分散在很多个组件 如果后期改为60天 不能做到只改一处。
+   - `TOTAL_DAYS`
+   - `COLUMN_WIDTH_PX` 
+   - `dateRangeStart`
+   - `dateRangeEnd`
+
